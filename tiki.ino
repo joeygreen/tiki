@@ -1,10 +1,12 @@
 #include <Servo.h>
 
 Servo tikiMouthServo;
-int opened = 75;
-int closed = 0;
-int mouthState = closed;
-int warChants = 5;
+enum mouthState { 
+  Opened = 75, 
+  Closed = 0 
+};
+mouthState currentMouthState = Closed;
+int warChants = 4;
 
 void setup() {
   tikiMouthServo.attach(9);
@@ -21,30 +23,35 @@ void loop() {
 }
 
 void warChant() {
-  chant(2);
+  chant(2, 130); // ooh
   delay(250);
-  chant(2);
+  chant(2, 130); // ahh
   delay(250);
-  chant(6);
+  chant(6, 130); // aye ooh ooh ha
 }
 
-void chant(int itterations) {
+void chant(int itterations, int delayMs) {
   for (int i = 0; i < itterations; i++) {
-    logMouthState(mouthState);
-    tikiMouthServo.write(mouthState);
-    mouthState = toggleMouth(mouthState, opened, closed);  
-    delay(130);
+    logMouthState(currentMouthState);
+    tikiMouthServo.write(currentMouthState);
+    currentMouthState = toggleMouth();  
+    delay(delayMs);
   }
 }
 
-static int toggleMouth(int currentAngle, int opened, int closed) {
-  return (currentAngle == closed) 
-    ? opened 
-    : closed;
+mouthState toggleMouth() {
+  switch (currentMouthState) {
+    case Closed:
+      return Opened;
+      break;
+    case Opened:
+      return Closed;
+      break;
+  }
 }
 
-static void logMouthState(int mouthState) {
+static void logMouthState(mouthState state) {
   Serial.print("Mouth State: ");
-  Serial.print(mouthState == 0 ? "Closed" : "Opened");
+  Serial.print(state == Closed ? "Mouth Closed" : "Mouth Opened");
   Serial.print("\n");
 }
