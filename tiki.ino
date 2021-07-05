@@ -40,14 +40,7 @@ void chant(int itterations, int delayMs) {
 }
 
 mouthState toggleMouth() {
-  switch (currentMouthState) {
-    case Closed:
-      return Opened;
-      break;
-    case Opened:
-      return Closed;
-      break;
-  }
+  return currentMouthState == Closed ? Opened : Closed;
 }
 
 static void logMouthState(mouthState state) {
