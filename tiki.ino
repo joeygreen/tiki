@@ -9,7 +9,7 @@ mouthState currentMouthState = Closed;
 int warChants = 4;
 
 void setup() {
-  tikiMouthServo.attach(9);
+  tikiMouthServo.attach(13);
   
   Serial.begin(9600);
 }
