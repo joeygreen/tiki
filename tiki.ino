@@ -1,16 +1,63 @@
 #include <Servo.h>
 
-Servo tikiMouthServo;
-enum mouthState { 
+enum servoState { 
   Opened = 75, 
-  Closed = 0 
+  Closed = 0
 };
-mouthState currentMouthState = Closed;
-int warChants = 4;
+
+Servo testServo;
+
+class AnimatronicServo {
+  private: Servo servo;
+  private: byte pin;
+    
+  private: servoState state;
+  public: servoState getState() {
+    return state;
+  }
+
+  public:
+    AnimatronicServo(Servo servo, byte pin, servoState state) {
+      this->servo = servo;
+      this->pin = pin;
+      this->state = state;
+      init();
+    }
+
+  private:
+    init() {
+      servo.attach(pin);
+      servo.write(state);
+    }
+
+  public:
+    void toggleState() {
+      if (state == Closed) {
+        open();
+      } else {
+        close();        
+      }
+    }
+
+  public: void open() {
+    state = Opened;
+    servo.write(state);    
+  }
+
+  public: void close() {
+    state = Closed;
+    servo.write(state);
+  }
+
+};
+
+// servos
+AnimatronicServo mouthServo = AnimatronicServo(testServo, 13, Closed);
+
+// show constants
+const int warChants = 4;
 
 void setup() {
-  tikiMouthServo.attach(13);
-  
   Serial.begin(9600);
 }
 
@@ -19,32 +66,29 @@ void loop() {
     warChant();
     delay(275);
   }
-  exit(0);  
+
+  exit(0);
 }
 
 void warChant() {
-  chant(2, 130); // ooh
+  toggleOpenedClosedState(mouthServo, 2, 130); // ooh
   delay(250);
-  chant(2, 130); // ahh
+  toggleOpenedClosedState(mouthServo, 2, 130); // ahh
   delay(250);
-  chant(6, 130); // aye ooh ooh ha
+  toggleOpenedClosedState(mouthServo, 6, 130); // aye ooh ooh ha
 }
 
-void chant(int itterations, int delayMs) {
+static void toggleOpenedClosedState(AnimatronicServo animatronicServo, int itterations, int delayMs) {
+  logServoState(animatronicServo.getState());
   for (int i = 0; i < itterations; i++) {
-    logMouthState(currentMouthState);
-    tikiMouthServo.write(currentMouthState);
-    currentMouthState = toggleMouth();  
+    animatronicServo.toggleState();
+    logServoState(animatronicServo.getState());
     delay(delayMs);
   }
 }
 
-mouthState toggleMouth() {
-  return currentMouthState == Closed ? Opened : Closed;
-}
-
-static void logMouthState(mouthState state) {
-  Serial.print("Mouth State: ");
-  Serial.print(state == Closed ? "Mouth Closed" : "Mouth Opened");
+static void logServoState(servoState state) {
+  Serial.print("Servo State: ");
+  Serial.print(state);
   Serial.print("\n");
 }
